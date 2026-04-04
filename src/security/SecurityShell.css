@@ -1,0 +1,46 @@
+/* ── wrapper ── */
+.sec-shell {
+  /* prevent text selection across the entire protected area */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* prevent touch callout (iOS long-press menu) */
+  -webkit-touch-callout: none;
+
+  /* prevent tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* allow selection inside inputs and textareas */
+.sec-shell input,
+.sec-shell textarea,
+.sec-shell [contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* ── blur when window loses focus ── */
+body.sec-blurred .sec-shell {
+  filter: blur(8px);
+  pointer-events: none;
+  transition: filter 0.2s ease;
+}
+
+body:not(.sec-blurred) .sec-shell {
+  filter: none;
+  transition: filter 0.3s ease;
+}
+
+/* ── disable image drag ── */
+.sec-shell img {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ── print: hide everything ── */
+@media print {
+  .sec-shell {
+    display: none !important;
+  }
+}

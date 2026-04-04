@@ -1,11 +1,14 @@
 import './App.css'
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from './context/AuthContext'
-import LeftPanel  from './components/login/LeftPanel'
-import TopBar     from './components/login/TopBar'
-import LoginForm  from './components/login/LoginForm'
-import SignupForm from './components/signup/SignupForm'
-import BottomBar  from './components/login/BottomBar'
+import LeftPanel     from './components/login/LeftPanel'
+import TopBar        from './components/login/TopBar'
+import LoginForm     from './components/login/LoginForm'
+import SignupForm    from './components/signup/SignupForm'
+import BottomBar     from './components/login/BottomBar'
+import SecurityShell from './security/SecurityShell'
+
+const IS_PROD = import.meta.env.VITE_APP_ENV === 'production'
 
 // ── minimal dashboard shown after auth ──────────────────────────
 function Dashboard() {
@@ -53,7 +56,7 @@ export default function App() {
 
   // ── authenticated ──
   if (user) {
-    return (
+    const content = (
       <div className="page">
         <LeftPanel page="login" />
         <main className="panel-right">
@@ -63,6 +66,7 @@ export default function App() {
         </main>
       </div>
     )
+    return IS_PROD ? <SecurityShell>{content}</SecurityShell> : content
   }
 
   // ── unauthenticated ──
