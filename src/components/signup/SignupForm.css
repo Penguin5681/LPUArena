@@ -274,3 +274,35 @@
   .sf-row { grid-template-columns: 1fr; gap: 22px; }
   .sf { padding: 28px 20px 36px; }
 }
+
+/* api error */
+.sf-error {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  color: #ff5f5f;
+  background: rgba(255,95,95,0.08);
+  border: 1px solid rgba(255,95,95,0.2);
+  padding: 10px 14px;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+
+/* spinner */
+.sf-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(10,10,10,0.3);
+  border-top-color: #0a0a0a;
+  border-radius: 50%;
+  animation: sf-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes sf-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sf-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

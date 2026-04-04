@@ -274,3 +274,35 @@
     gap: 24px;
   }
 }
+
+/* error message */
+.lf-error {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  color: #ff5f5f;
+  background: rgba(255,95,95,0.08);
+  border: 1px solid rgba(255,95,95,0.2);
+  padding: 10px 14px;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+
+/* loading spinner inside button */
+.lf-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(10,10,10,0.3);
+  border-top-color: #0a0a0a;
+  border-radius: 50%;
+  animation: lf-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes lf-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lf-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

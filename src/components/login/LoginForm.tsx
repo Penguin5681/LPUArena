@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './LoginForm.css'
+import { useAuth } from '../../context/AuthContext'
+import { apiSignin } from '../../lib/auth'
 
 function IconEye() {
   return (
@@ -33,12 +35,30 @@ function IconArrow() {
 }
 
 export default function LoginForm({ onSignup }: { onSignup: () => void }) {
+  const { login } = useAuth()
+
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [focused, setFocused]   = useState<string | null>(null)
+  const [error, setError]       = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (submitting) return
+    setError(null)
+    setSubmitting(true)
+
+    try {
+      const res = await apiSignin({ email, password })
+      login(res.token, res.user)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sign in failed')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="lf">
@@ -60,10 +80,10 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
 
         {/* email */}
         <div className={`lf-field ${focused === 'email' ? 'lf-field--focused' : ''}`}>
-          <label htmlFor="email" className="lf-label">Email address</label>
+          <label htmlFor="lf-email" className="lf-label">Email address</label>
           <div className="lf-input-wrapper">
             <input
-              id="email"
+              id="lf-email"
               type="email"
               className="lf-input"
               value={email}
@@ -73,6 +93,8 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
               autoComplete="email"
               spellCheck={false}
               placeholder="you@example.com"
+              disabled={submitting}
+              required
             />
             <div className="lf-underline" />
           </div>
@@ -81,12 +103,12 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         {/* password */}
         <div className={`lf-field ${focused === 'password' ? 'lf-field--focused' : ''}`}>
           <div className="lf-label-row">
-            <label htmlFor="password" className="lf-label">Password</label>
+            <label htmlFor="lf-password" className="lf-label">Password</label>
             <a href="#" className="lf-forgot">Forgot?</a>
           </div>
           <div className="lf-input-wrapper">
             <input
-              id="password"
+              id="lf-password"
               type={showPass ? 'text' : 'password'}
               className="lf-input"
               value={password}
@@ -96,6 +118,8 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
               autoComplete="current-password"
               spellCheck={false}
               placeholder="Enter your password"
+              disabled={submitting}
+              required
             />
             <button
               type="button"
@@ -109,16 +133,22 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
           </div>
         </div>
 
-        <button type="submit" className="lf-submit">
-          <span>Sign In</span>
-          <span className="lf-submit-icon"><IconArrow /></span>
+        {/* error */}
+        {error && <p className="lf-error" role="alert">{error}</p>}
+
+        <button type="submit" className="lf-submit" disabled={submitting}>
+          <span>{submitting ? 'Signing in…' : 'Sign In'}</span>
+          {!submitting && <span className="lf-submit-icon"><IconArrow /></span>}
+          {submitting  && <span className="lf-spinner" aria-hidden="true" />}
         </button>
 
       </form>
 
       <p className="lf-switch">
         No account?{' '}
-        <button className="lf-switch-btn" onClick={onSignup}>Create one free</button>
+        <button className="lf-switch-btn" onClick={onSignup} disabled={submitting}>
+          Create one free
+        </button>
       </p>
     </div>
   )
