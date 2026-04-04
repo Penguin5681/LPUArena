@@ -7,20 +7,9 @@ import LoginForm     from './components/login/LoginForm'
 import SignupForm    from './components/signup/SignupForm'
 import BottomBar     from './components/login/BottomBar'
 import SecurityShell from './security/SecurityShell'
+import Dashboard     from './dashboard/Dashboard'
 
 const IS_PROD = import.meta.env.VITE_APP_ENV === 'production'
-
-// ── minimal dashboard shown after auth ──────────────────────────
-function Dashboard() {
-  const { user, logout } = useAuth()
-  return (
-    <div className="dashboard">
-      <p className="dashboard-greeting">Welcome, <strong>{user?.name}</strong></p>
-      <p className="dashboard-email">{user?.email}</p>
-      <button className="dashboard-logout" onClick={logout}>Sign out</button>
-    </div>
-  )
-}
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -56,16 +45,7 @@ export default function App() {
 
   // ── authenticated ──
   if (user) {
-    const content = (
-      <div className="page">
-        <LeftPanel page="login" />
-        <main className="panel-right">
-          <TopBar page="login" onNavigate={() => {}} />
-          <Dashboard />
-          <BottomBar />
-        </main>
-      </div>
-    )
+    const content = <Dashboard />
     return IS_PROD ? <SecurityShell>{content}</SecurityShell> : content
   }
 
