@@ -1,0 +1,33 @@
+.bottombar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 52px;
+  border-top: 1px solid #1a1a1a;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  color: #333;
+  letter-spacing: 0.3px;
+}
+
+.bottombar-links {
+  display: flex;
+  gap: 20px;
+}
+
+.bottombar-links a {
+  color: #333;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.bottombar-links a:hover { color: #f5f5f0; }
+
+@media (max-width: 480px) {
+  .bottombar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 24px;
+    text-align: center;
+  }
+}

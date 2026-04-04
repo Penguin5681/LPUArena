@@ -1,0 +1,252 @@
+/* Container Reset & Layout */
+.lf {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 440px; /* Reduced slightly for better form proportions */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.lf *, .lf *::before, .lf *::after {
+  box-sizing: inherit;
+}
+
+/* Eyebrow */
+.lf-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  color: #e8ff47;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.lf-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e8ff47;
+  box-shadow: 0 0 8px rgba(232,255,71,0.6);
+  flex-shrink: 0;
+  animation: lf-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes lf-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.75); }
+}
+
+/* Typography */
+.lf-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(36px, 8vw, 52px);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #f5f5f0;
+  letter-spacing: -1px;
+  margin: 0 0 12px 0;
+}
+
+.lf-title em {
+  font-style: italic;
+  color: #e8ff47;
+}
+
+.lf-desc {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  color: #888;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+/* Rule */
+.lf-rule {
+  height: 1px;
+  background: linear-gradient(90deg, #222 0%, #2e2e2e 50%, transparent 100%);
+  margin-bottom: 32px;
+}
+
+/* Form Container */
+.lf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px; /* Handles spacing globally instead of individual field margins */
+}
+
+/* Field & Label */
+.lf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lf-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lf-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.lf-field--focused .lf-label { 
+  color: #e8ff47; 
+}
+
+/* Input Wrappers */
+.lf-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.lf-input {
+  flex: 1;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #f5f5f0;
+  caret-color: #e8ff47;
+  letter-spacing: 0.2px;
+}
+
+.lf-input::placeholder {
+  color: #333;
+}
+
+/* Interactive Elements */
+.lf-eye {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 0 12px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.lf-eye:hover { color: #888; }
+.lf-eye:focus-visible { outline: 1px solid #e8ff47; outline-offset: 4px; border-radius: 4px; }
+
+/* char count */
+.lf-char-count {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  color: #333;
+  flex-shrink: 0;
+  padding-left: 8px;
+  transition: color 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.lf-field--focused .lf-char-count { color: #666; }
+
+.lf-underline {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: #2a2a2a;
+}
+
+.lf-underline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #e8ff47, #c8df20);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lf-field--focused .lf-underline::after { 
+  transform: scaleX(1); 
+}
+
+.lf-forgot {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  color: #555;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.lf-forgot:hover { color: #e8ff47; }
+
+/* Primary Action */
+.lf-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  background: #e8ff47;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0a0a0a;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.lf-submit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.2);
+  transform: translateX(-101%);
+  transition: transform 0.3s ease;
+}
+
+.lf-submit:hover::after  { transform: translateX(0); }
+.lf-submit:hover         { background: #d4eb30; }
+.lf-submit:active        { transform: scale(0.98); }
+.lf-submit:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.lf-submit-icon {
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.lf-submit:hover .lf-submit-icon { transform: translateX(4px); }
+
+/* Responsive Handling */
+@media (max-width: 480px) {
+  .lf {
+    padding: 32px 20px;
+  }
+  
+  .lf-form {
+    gap: 24px;
+  }
+}
