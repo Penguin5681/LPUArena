@@ -32,8 +32,8 @@ function IconArrow() {
   )
 }
 
-export default function LoginForm() {
-  const [regNo, setRegNo]       = useState('')
+export default function LoginForm({ onSignup }: { onSignup: () => void }) {
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [focused, setFocused]   = useState<string | null>(null)
@@ -42,13 +42,11 @@ export default function LoginForm() {
 
   return (
     <div className="lf">
-      {/* eyebrow */}
       <div className="lf-eyebrow">
         <span className="lf-eyebrow-dot" />
         Authentication required
       </div>
 
-      {/* heading */}
       <h1 className="lf-title">
         Welcome<br />
         <em>back.</em>
@@ -56,36 +54,31 @@ export default function LoginForm() {
 
       <p className="lf-desc">Sign in to access your account.</p>
 
-      {/* divider */}
       <div className="lf-rule" />
 
       <form onSubmit={handleSubmit} noValidate className="lf-form">
 
-        {/* registration number field */}
-        <div className={`lf-field ${focused === 'regNo' ? 'lf-field--focused' : ''}`}>
-          <label htmlFor="regNo" className="lf-label">Registration Number</label>
+        {/* email */}
+        <div className={`lf-field ${focused === 'email' ? 'lf-field--focused' : ''}`}>
+          <label htmlFor="email" className="lf-label">Email address</label>
           <div className="lf-input-wrapper">
             <input
-              id="regNo"
-              type="text"
-              inputMode="numeric"
-              maxLength={8}
-              pattern="\d{8}"
+              id="email"
+              type="email"
               className="lf-input"
-              value={regNo}
-              onChange={e => setRegNo(e.target.value.replace(/\D/g, '').slice(0, 8))}
-              onFocus={() => setFocused('regNo')}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onFocus={() => setFocused('email')}
               onBlur={() => setFocused(null)}
-              autoComplete="username"
+              autoComplete="email"
               spellCheck={false}
-              placeholder="8-digit number"
+              placeholder="you@example.com"
             />
-            <span className="lf-char-count">{regNo.length}/8</span>
             <div className="lf-underline" />
           </div>
         </div>
 
-        {/* password field */}
+        {/* password */}
         <div className={`lf-field ${focused === 'password' ? 'lf-field--focused' : ''}`}>
           <div className="lf-label-row">
             <label htmlFor="password" className="lf-label">Password</label>
@@ -116,13 +109,17 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* submit */}
         <button type="submit" className="lf-submit">
           <span>Sign In</span>
           <span className="lf-submit-icon"><IconArrow /></span>
         </button>
 
       </form>
+
+      <p className="lf-switch">
+        No account?{' '}
+        <button className="lf-switch-btn" onClick={onSignup}>Create one free</button>
+      </p>
     </div>
   )
 }

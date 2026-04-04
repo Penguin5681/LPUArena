@@ -240,6 +240,30 @@
 
 .lf-submit:hover .lf-submit-icon { transform: translateX(4px); }
 
+/* Switch to signup */
+.lf-switch {
+  margin-top: 28px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  color: #444;
+}
+
+.lf-switch-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5f5f0;
+  padding: 0;
+  border-bottom: 1px solid #333;
+  padding-bottom: 1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.lf-switch-btn:hover { color: #e8ff47; border-color: #e8ff47; }
+
 /* Responsive Handling */
 @media (max-width: 480px) {
   .lf {

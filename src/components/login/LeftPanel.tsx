@@ -3,7 +3,7 @@ import './LeftPanel.css'
 
 const TICKER = 'ACCESS GRANTED ◆ SECURE SESSION ◆ ENCRYPTED ◆ VERIFIED ◆ '
 
-export default function LeftPanel() {
+export default function LeftPanel({ page }: { page: 'login' | 'signup' }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -147,22 +147,40 @@ export default function LeftPanel() {
       <div className="lp-noise" />
 
       {/* brand mark */}
-      <div className="lp-brand">◈ CORP</div>
+      <div className="lp-brand">◈ AlgoArena</div>
 
       {/* hero type */}
       <div className="lp-hero">
-        <div className="lp-word">
-          <span className="lp-letter">S</span>
-          <span className="lp-letter">I</span>
-          <span className="lp-letter">G</span>
-          <span className="lp-letter lp-letter--accent">N</span>
-        </div>
-        <div className="lp-divider" />
-        <div className="lp-word">
-          <span className="lp-letter">I</span>
-          <span className="lp-letter">N</span>
-        </div>
-        <p className="lp-tagline">Secure access portal</p>
+        {page === 'login' ? (
+          <>
+            <div className="lp-word">
+              <span className="lp-letter">S</span>
+              <span className="lp-letter">I</span>
+              <span className="lp-letter">G</span>
+              <span className="lp-letter lp-letter--accent">N</span>
+            </div>
+            <div className="lp-divider" />
+            <div className="lp-word">
+              <span className="lp-letter">I</span>
+              <span className="lp-letter">N</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="lp-word">
+              <span className="lp-letter">S</span>
+              <span className="lp-letter">I</span>
+              <span className="lp-letter">G</span>
+              <span className="lp-letter lp-letter--accent">N</span>
+            </div>
+            <div className="lp-divider" />
+            <div className="lp-word">
+              <span className="lp-letter">U</span>
+              <span className="lp-letter lp-letter--accent">P</span>
+            </div>
+          </>
+        )}
+        <p className="lp-tagline">{page === 'login' ? 'Secure access portal' : 'Join the arena'}</p>
       </div>
 
       {/* bottom meta + ticker */}

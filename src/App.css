@@ -18,6 +18,83 @@
   min-height: 100svh;
 }
 
+/* ── form transition stage ── */
+.form-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+.form-slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  overflow-y: auto;
+  /* default: invisible and out of flow */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(0);
+}
+
+/* fully settled — visible, interactive */
+.form-slot.settled {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+  transition: none;
+}
+
+/* completely hidden between transitions */
+.form-slot.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(0);
+  transition: none;
+}
+
+/* ── forward: login → signup ── */
+/* login exits to the left */
+.form-slot.exit-forward {
+  animation: slideOutLeft 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+/* signup enters from the right */
+.form-slot.enter-forward {
+  animation: slideInRight 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+/* ── back: signup → login ── */
+/* signup exits to the right */
+.form-slot.exit-back {
+  animation: slideOutRight 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+/* login enters from the left */
+.form-slot.enter-back {
+  animation: slideInLeft 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes slideOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-48px); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(48px); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 @media (max-width: 900px) {
   .page { grid-template-columns: 1fr; }
   .panel-right { min-height: 100svh; }
