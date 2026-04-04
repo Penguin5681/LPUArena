@@ -181,12 +181,13 @@ export default function QuestionList({ onSelect }: Props) {
                 <th className="ql-th ql-th--topic">Topic</th>
                 <th className="ql-th ql-th--diff">Difficulty</th>
                 <th className="ql-th ql-th--cx">Time</th>
+                <th className="ql-th ql-th--pts">Points</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="ql-empty">
+                  <td colSpan={6} className="ql-empty">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
@@ -218,6 +219,9 @@ export default function QuestionList({ onSelect }: Props) {
                   </td>
                   <td className="ql-td ql-td--cx">
                     <code className="ql-cx">{q.time_complexity}</code>
+                  </td>
+                  <td className="ql-td ql-td--pts">
+                    <span className="ql-pts">⬡ {q.points}</span>
                   </td>
                 </tr>
               ))}

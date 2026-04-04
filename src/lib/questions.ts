@@ -15,6 +15,7 @@ export interface Question {
   description: string
   topic: string
   difficulty: Difficulty
+  points: number
   constraints: string[]
   examples: Example[]
   hints: string[]

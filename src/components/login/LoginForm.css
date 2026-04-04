@@ -63,7 +63,7 @@
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 300;
-  color: #888;
+  color: #999;                  /* was #888 */
   margin: 0 0 32px 0;
   line-height: 1.6;
 }
@@ -101,7 +101,7 @@
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #666;
+  color: #888;                  /* was #666 */
   transition: color 0.2s ease;
 }
 
@@ -132,7 +132,7 @@
 }
 
 .lf-input::placeholder {
-  color: #333;
+  color: #555;                  /* was #333 */
 }
 
 /* Interactive Elements */
@@ -140,7 +140,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #444;
+  color: #666;                  /* was #444 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,7 +149,7 @@
   flex-shrink: 0;
 }
 
-.lf-eye:hover { color: #888; }
+.lf-eye:hover { color: #aaa; }
 .lf-eye:focus-visible { outline: 1px solid #e8ff47; outline-offset: 4px; border-radius: 4px; }
 
 /* char count */
@@ -189,7 +189,7 @@
 .lf-forgot {
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 12px;
-  color: #555;
+  color: #777;                  /* was #555 */
   text-decoration: none;
   transition: color 0.15s;
 }
@@ -245,7 +245,7 @@
   margin-top: 28px;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 13px;
-  color: #444;
+  color: #777;                  /* was #444 */
 }
 
 .lf-switch-btn {

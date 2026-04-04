@@ -61,7 +61,7 @@
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 300;
-  color: #666;
+  color: #999;                  /* was #666 */
   margin: 0 0 24px;
   line-height: 1.6;
 }
@@ -100,7 +100,7 @@
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #555;
+  color: #888;                  /* was #555 */
   transition: color 0.2s;
 }
 
@@ -130,7 +130,7 @@
   letter-spacing: 0.2px;
 }
 
-.sf-input::placeholder { color: #2e2e2e; }
+.sf-input::placeholder { color: #555; }  /* was #2e2e2e */
 
 /* underline */
 .sf-underline {
@@ -160,7 +160,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #3a3a3a;
+  color: #666;                  /* was #3a3a3a */
   display: flex;
   align-items: center;
   padding: 0 0 0 8px;
@@ -168,14 +168,14 @@
   flex-shrink: 0;
 }
 
-.sf-eye:hover { color: #888; }
+.sf-eye:hover { color: #aaa; }
 .sf-eye:focus-visible { outline: 1px solid #e8ff47; outline-offset: 3px; }
 
 /* reg count */
 .sf-count {
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 10px;
-  color: #333;
+  color: #666;                  /* was #333 */
   flex-shrink: 0;
   padding-left: 8px;
   letter-spacing: 0.5px;
@@ -250,7 +250,7 @@
   margin-top: 24px;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 13px;
-  color: #444;
+  color: #777;                  /* was #444 */
 }
 
 .sf-switch-btn {
