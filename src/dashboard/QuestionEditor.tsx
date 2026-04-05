@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import Editor from '@monaco-editor/react'
 import type { Question } from '../lib/questions'
-import { apiSubmit, JUDGE0_LANG_ID, prepareCode, type Judge0Result } from '../lib/judge0'
+import { apiSubmit, JUDGE0_LANG_ID, prepareCode, type Judge0Result, getVerdict } from '../lib/judge0'
+import { logSubmission } from '../lib/leaderboard'
 import SubmitResult from './SubmitResult'
 import './QuestionEditor.css'
 
@@ -84,6 +85,17 @@ export default function QuestionEditor({ question, onBack }: Props) {
         memory_limit:    128000,
       })
       setResult(res.result)
+
+      // log submission to leaderboard (fire-and-forget)
+      const verdict   = getVerdict(res.result.status)
+      const isCorrect = verdict === 'accepted'
+      logSubmission({
+        questionId: question.id,
+        languageId: JUDGE0_LANG_ID[lang],
+        sourceCode: prepared,
+        verdict:    res.result.status.description,
+        isCorrect,
+      })
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : 'Submission failed')
     } finally {

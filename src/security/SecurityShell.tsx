@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { useSecurityLayer } from './useSecurityLayer'
+import { useFullscreenEnforcement } from './useFullscreenEnforcement'
+import { useEventLogger } from './useEventLogger'
 import './SecurityShell.css'
 
 interface Props {
@@ -8,6 +10,8 @@ interface Props {
 
 export default function SecurityShell({ children }: Props) {
   useSecurityLayer()
+  useFullscreenEnforcement()
+  useEventLogger()
 
   // ── blur content when window loses focus (alt-tab / screen share) ──
   useEffect(() => {
