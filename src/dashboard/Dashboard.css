@@ -193,6 +193,14 @@
   min-width: 0;
 }
 
+.db-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 /* ── mobile ── */
 @media (max-width: 768px) {
   .db-sidebar { width: 52px; }
