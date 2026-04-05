@@ -2,14 +2,17 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { apiGetAllQuestions, clearQuestionsCache, type Question } from '../lib/questions'
 import './QuestionList.css'
 
-interface Props { onSelect: (q: Question) => void }
+interface Props {
+  onSelect:  (q: Question) => void
+  onLoaded?: (questions: Question[]) => void
+}
 
 type Diff   = 'all' | 'easy' | 'medium' | 'hard'
 type SortBy = 'default' | 'title' | 'difficulty'
 
 const DIFF_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 }
 
-export default function QuestionList({ onSelect }: Props) {
+export default function QuestionList({ onSelect, onLoaded }: Props) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading]     = useState(true)
   const [error, setError]         = useState<string | null>(null)
@@ -26,8 +29,9 @@ export default function QuestionList({ onSelect }: Props) {
     const before = Date.now()
     try {
       const data = await apiGetAllQuestions()
-      setFromCache(Date.now() - before < 30) // near-instant = cache hit
+      setFromCache(Date.now() - before < 30)
       setQuestions(data)
+      onLoaded?.(data)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load')
     } finally {

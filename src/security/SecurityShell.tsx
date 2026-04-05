@@ -2,22 +2,18 @@ import { useEffect } from 'react'
 import { useSecurityLayer } from './useSecurityLayer'
 import { useFullscreenEnforcement } from './useFullscreenEnforcement'
 import { useEventLogger } from './useEventLogger'
+import { SecurityContext } from './SecurityContext'
 import './SecurityShell.css'
 
-interface Props {
-  children: React.ReactNode
-}
-
-export default function SecurityShell({ children }: Props) {
+export default function SecurityShell({ children }: { children: React.ReactNode }) {
   useSecurityLayer()
   useFullscreenEnforcement()
-  useEventLogger()
+  const { reportPaste, reportBurst } = useEventLogger()
 
-  // ── blur content when window loses focus (alt-tab / screen share) ──
+  // blur content when window loses focus
   useEffect(() => {
     const onBlur  = () => document.body.classList.add('sec-blurred')
     const onFocus = () => document.body.classList.remove('sec-blurred')
-
     window.addEventListener('blur',  onBlur)
     window.addEventListener('focus', onFocus)
     return () => {
@@ -27,8 +23,10 @@ export default function SecurityShell({ children }: Props) {
   }, [])
 
   return (
-    <div className="sec-shell">
-      {children}
-    </div>
+    <SecurityContext.Provider value={{ reportPaste, reportBurst }}>
+      <div className="sec-shell">
+        {children}
+      </div>
+    </SecurityContext.Provider>
   )
 }

@@ -1,8 +1,10 @@
-import { useState } from 'react'
-import Editor from '@monaco-editor/react'
+import { useState, useRef } from 'react'
+import Editor, { type OnMount } from '@monaco-editor/react'
+import type * as MonacoType from 'monaco-editor'
 import type { Question } from '../lib/questions'
 import { apiSubmit, JUDGE0_LANG_ID, prepareCode, type Judge0Result, getVerdict } from '../lib/judge0'
 import { logSubmission } from '../lib/leaderboard'
+import { useSecurity } from '../security/SecurityContext'
 import SubmitResult from './SubmitResult'
 import './QuestionEditor.css'
 
@@ -42,20 +44,56 @@ def solve():
 solve()`,
 }
 
-interface Props { question: Question; onBack: () => void }
+interface Props { question: Question; onBack: () => void; onNext: () => void }
 
-export default function QuestionEditor({ question, onBack }: Props) {
+export default function QuestionEditor({ question, onBack, onNext }: Props) {
+  const { reportPaste, reportBurst } = useSecurity()
+
   const [lang, setLang]           = useState<Lang>('cpp')
   const [code, setCode]           = useState<Record<Lang, string>>({ ...STARTERS })
   const [activeTab, setActiveTab] = useState<'description' | 'hints'>('description')
   const [revealedHints, setRevealedHints] = useState<Set<number>>(new Set())
 
+  // burst detection — track previous length per language
+  const prevLen = useRef<Record<Lang, number>>({
+    cpp:    STARTERS.cpp.length,
+    java:   STARTERS.java.length,
+    python: STARTERS.python.length,
+  })
+
+  // store editor instance for format action
+  const editorRef = useRef<MonacoType.editor.IStandaloneCodeEditor | null>(null)
+
+  // chars added in a single onChange that triggers burst detection
+  const BURST_THRESHOLD = 20
   // submission state
-  const [stdin, setStdin]         = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [result, setResult]       = useState<Judge0Result | null>(null)
+  const [stdin, setStdin]             = useState('')
+  const [submitting, setSubmitting]   = useState(false)
+  const [result, setResult]           = useState<Judge0Result | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [showStdin, setShowStdin] = useState(false)
+  const [showStdin, setShowStdin]     = useState(false)
+
+  // Monaco mount — block Ctrl/Cmd+V, intercept paste, store ref
+  const handleEditorMount: OnMount = (editor, monaco) => {
+    editorRef.current = editor
+
+    // Override the built-in paste command (Ctrl+V / Cmd+V)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {
+      reportPaste()
+      // do NOT call the default paste action — content is blocked
+    })
+
+    // Also intercept the editor's paste action by name
+    editor.onDidPaste(() => {
+      reportPaste()
+      // Undo the paste immediately so no content is inserted
+      editor.trigger('keyboard', 'undo', null)
+    })
+  }
+
+  const handleFormat = () => {
+    editorRef.current?.getAction('editor.action.formatDocument')?.run()
+  }
 
   const toggleHint = (i: number) =>
     setRevealedHints(s => {
@@ -88,7 +126,7 @@ export default function QuestionEditor({ question, onBack }: Props) {
 
       // log every submission regardless of verdict
       logSubmission({
-        questionId: question.id,
+        questionId: parseInt(question.id, 10),
         languageId: JUDGE0_LANG_ID[lang],
         sourceCode: prepared,
         verdict:    res.result.status.description,
@@ -100,7 +138,7 @@ export default function QuestionEditor({ question, onBack }: Props) {
 
       // still log the failed attempt so the server has a full record
       logSubmission({
-        questionId: question.id,
+        questionId: parseInt(question.id, 10),
         languageId: JUDGE0_LANG_ID[lang],
         sourceCode: prepareCode(code[lang], lang),
         verdict:    'Submission Error',
@@ -122,6 +160,16 @@ export default function QuestionEditor({ question, onBack }: Props) {
           Problems
         </button>
 
+        <button className="qe-next" onClick={onNext} aria-label="Next random problem" title="Next random problem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+            <polyline points="16 3 21 3 21 8"/>
+            <line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/>
+            <line x1="15" y1="15" x2="21" y2="21"/>
+          </svg>
+          Random
+        </button>
+
         <div className="qe-meta">
           <span className="qe-title">{question.title}</span>
           <span className={`qe-diff qe-diff--${question.difficulty}`}>{question.difficulty}</span>
@@ -134,7 +182,10 @@ export default function QuestionEditor({ question, onBack }: Props) {
             <button
               key={l}
               className={`qe-lang-btn ${lang === l ? 'qe-lang-btn--active' : ''}`}
-              onClick={() => setLang(l)}
+              onClick={() => {
+                prevLen.current[l] = code[l].length
+                setLang(l)
+              }}
             >
               {LANG_LABELS[l]}
             </button>
@@ -253,8 +304,25 @@ export default function QuestionEditor({ question, onBack }: Props) {
                 stdin
               </button>
               <button
+                className="qe-format"
+                onClick={handleFormat}
+                title="Format code (Shift+Alt+F)"
+                aria-label="Format code"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <line x1="21" y1="10" x2="7" y2="10"/>
+                  <line x1="21" y1="6"  x2="3" y2="6"/>
+                  <line x1="21" y1="14" x2="3" y2="14"/>
+                  <line x1="21" y1="18" x2="7" y2="18"/>
+                </svg>
+                Format
+              </button>
+              <button
                 className="qe-reset"
-                onClick={() => setCode(c => ({ ...c, [lang]: STARTERS[lang] }))}
+                onClick={() => {
+                  prevLen.current[lang] = STARTERS[lang].length
+                  setCode(c => ({ ...c, [lang]: STARTERS[lang] }))
+                }}
                 title="Reset to starter code"
               >
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
@@ -272,7 +340,23 @@ export default function QuestionEditor({ question, onBack }: Props) {
               height="100%"
               language={MONACO_LANG[lang]}
               value={code[lang]}
-              onChange={val => setCode(c => ({ ...c, [lang]: val ?? '' }))}
+              onChange={(val) => {
+                const next = val ?? ''
+                const delta = next.length - prevLen.current[lang]
+
+                if (delta > BURST_THRESHOLD) {
+                  // revert to previous value and flag
+                  const prev = code[lang]
+                  reportBurst(delta)
+                  // keep prevLen unchanged since we're reverting
+                  setCode(c => ({ ...c, [lang]: prev }))
+                  return
+                }
+
+                prevLen.current[lang] = next.length
+                setCode(c => ({ ...c, [lang]: next }))
+              }}
+              onMount={handleEditorMount}
               theme="vs-dark"
               options={{
                 fontSize: 14,

@@ -152,11 +152,15 @@ export default function ComingSoon() {
               { label: 'Minutes', value: time.minutes },
               { label: 'Seconds', value: time.seconds },
             ].map(({ label, value }, i) => (
-              <div key={label} className="cs-unit">
-                <div className="cs-unit-num">{pad(value)}</div>
-                <div className="cs-unit-label">{label}</div>
-                {i < 3 && <span className="cs-sep" aria-hidden="true">:</span>}
-              </div>
+              <>
+                <div key={label} className="cs-unit">
+                  <div className="cs-unit-num">{pad(value)}</div>
+                  <div className="cs-unit-label">{label}</div>
+                </div>
+                {i < 3 && (
+                  <span key={`sep-${i}`} className="cs-sep" aria-hidden="true">:</span>
+                )}
+              </>
             ))}
           </div>
         ) : (

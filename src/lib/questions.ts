@@ -1,4 +1,5 @@
 import { getToken } from './auth'
+import { trackApiCall } from './apiTracker'
 
 const BASE      = import.meta.env.VITE_API_BASE_URL as string
 const CACHE_KEY = 'aa_questions_cache'
@@ -52,6 +53,10 @@ export async function apiGetAllQuestions(): Promise<Question[]> {
     headers: { Authorization: `Bearer ${token}` },
   })
   const json = await res.json().catch(() => ({}))
+
+  // track after fetch — fire-and-forget
+  trackApiCall('/api/questions/all', 'GET', res.status)
+
   if (!res.ok) throw new Error(json?.message ?? `Failed (${res.status})`)
 
   const data: Question[] = json.data ?? json

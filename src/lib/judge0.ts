@@ -1,4 +1,5 @@
 import { getToken } from './auth'
+import { trackApiCall } from './apiTracker'
 
 const BASE = import.meta.env.VITE_API_BASE_URL as string
 
@@ -73,6 +74,10 @@ export async function apiSubmit(payload: SubmitPayload): Promise<SubmitResponse>
   })
 
   const data = await res.json().catch(() => ({}))
+
+  // track after fetch — fire-and-forget
+  trackApiCall('/api/judge0/submit', 'POST', res.status)
+
   if (!res.ok) throw new Error(data?.message ?? `Submission failed (${res.status})`)
   return data as SubmitResponse
 }

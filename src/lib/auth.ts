@@ -1,3 +1,5 @@
+import { trackApiCall } from './apiTracker'
+
 const BASE = import.meta.env.VITE_API_BASE_URL as string
 
 export interface AuthUser {
@@ -34,6 +36,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   })
 
   const data = await res.json().catch(() => ({}))
+
+  // track after fetch — fire-and-forget, runs last
+  trackApiCall(path, options.method ?? 'GET', res.status)
 
   if (!res.ok) {
     throw new Error(data?.message ?? `Request failed (${res.status})`)
