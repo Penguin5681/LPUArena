@@ -65,7 +65,7 @@ export default function QuestionEditor({ question, onBack, onNext }: Props) {
   const editorRef = useRef<MonacoType.editor.IStandaloneCodeEditor | null>(null)
 
   // chars added in a single onChange that triggers burst detection
-  const BURST_THRESHOLD = 20
+  const BURST_THRESHOLD = 30
   // submission state
   const [stdin, setStdin]             = useState('')
   const [submitting, setSubmitting]   = useState(false)
