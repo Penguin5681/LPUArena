@@ -1,0 +1,225 @@
+/* ── wrapper ── */
+.cs {
+  position: relative;
+  min-height: 100svh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ── canvas ── */
+.cs-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── overlays ── */
+.cs-scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.18) 3px,
+    rgba(0,0,0,0.18) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cs-vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.75) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── content ── */
+.cs-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 40px 24px;
+  max-width: 680px;
+  width: 100%;
+}
+
+/* brand */
+.cs-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 52px;
+}
+
+.cs-brand-mark {
+  font-size: 22px;
+  color: #e8ff47;
+  line-height: 1;
+}
+
+.cs-brand-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #f5f5f0;
+  text-transform: uppercase;
+}
+
+/* headline */
+.cs-headline {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(42px, 8vw, 80px);
+  font-weight: 400;
+  line-height: 1.05;
+  color: #f5f5f0;
+  letter-spacing: -2px;
+  margin-bottom: 24px;
+}
+
+.cs-headline em {
+  font-style: italic;
+  color: #e8ff47;
+  text-shadow: 0 0 40px rgba(232,255,71,0.3);
+}
+
+/* sub */
+.cs-sub {
+  font-size: 15px;
+  font-weight: 300;
+  color: #888;
+  line-height: 1.7;
+  margin-bottom: 52px;
+}
+
+.cs-sub strong {
+  color: #f5f5f0;
+  font-weight: 600;
+}
+
+/* countdown */
+.cs-countdown {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 52px;
+  position: relative;
+}
+
+.cs-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 0 20px;
+}
+
+.cs-unit-num {
+  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-size: clamp(52px, 9vw, 96px);
+  font-weight: 400;
+  color: #f5f5f0;
+  line-height: 1;
+  letter-spacing: -1px;
+  text-shadow: 0 0 30px rgba(232,255,71,0.12);
+  transition: color 0.3s;
+}
+
+.cs-unit:last-child .cs-unit-num {
+  color: #e8ff47;
+  text-shadow: 0 0 30px rgba(232,255,71,0.35);
+}
+
+.cs-unit-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #444;
+  margin-top: 6px;
+}
+
+.cs-sep {
+  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-size: clamp(52px, 9vw, 96px);
+  color: #2a2a2a;
+  line-height: 1;
+  align-self: flex-start;
+  padding: 0;
+  margin: 0 -8px;
+  pointer-events: none;
+}
+
+/* live badge */
+.cs-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4ade80;
+  letter-spacing: 1px;
+  margin-bottom: 52px;
+  padding: 12px 24px;
+  border: 1px solid rgba(74,222,128,0.3);
+  background: rgba(74,222,128,0.06);
+}
+
+.cs-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+  animation: cs-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes cs-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+/* rule */
+.cs-rule {
+  width: 60px;
+  height: 2px;
+  background: #e8ff47;
+  margin: 0 auto 24px;
+  position: relative;
+}
+
+.cs-rule::after {
+  content: '';
+  position: absolute;
+  left: 68px;
+  top: 0;
+  width: 14px;
+  height: 2px;
+  background: #2a2a2a;
+}
+
+/* tagline */
+.cs-tagline {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #333;
+}
+
+/* responsive */
+@media (max-width: 480px) {
+  .cs-unit { padding: 0 10px; }
+  .cs-sep  { margin: 0 -4px; }
+}
