@@ -138,3 +138,63 @@ export async function sendHeartbeat(
     return null
   }
 }
+
+// ── Points ─────────────────────────────────────────────────────
+
+export interface PointsData {
+  userId:               number
+  score:                number
+  totalDeductions:      number
+  wrongSubmissionCount: number
+  illegalInjectionCount: number
+}
+
+export interface PointsResponse { data: PointsData }
+
+export async function getMyPoints(): Promise<PointsResponse | null> {
+  try {
+    const token = getToken()
+    if (!token) return null
+    const res = await fetch(`${BASE}/api/leaderboard/points`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    trackApiCall('/api/leaderboard/points', 'GET', res.status)
+    return res.ok ? (await res.json()) as PointsResponse : null
+  } catch { return null }
+}
+
+// ── Solved by difficulty ───────────────────────────────────────
+
+export interface SolvedProblem {
+  questionId: number
+  title:      string
+  slug:       string
+}
+
+export interface DifficultyBucket {
+  solvedCount: number
+  problems:    SolvedProblem[]
+}
+
+export interface SolvedByDifficultyData {
+  totalSolved:  number
+  byDifficulty: {
+    easy:   DifficultyBucket
+    medium: DifficultyBucket
+    hard:   DifficultyBucket
+  }
+}
+
+export interface SolvedByDifficultyResponse { data: SolvedByDifficultyData }
+
+export async function getMySolvedByDifficulty(): Promise<SolvedByDifficultyResponse | null> {
+  try {
+    const token = getToken()
+    if (!token) return null
+    const res = await fetch(`${BASE}/api/leaderboard/solved-by-difficulty`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    trackApiCall('/api/leaderboard/solved-by-difficulty', 'GET', res.status)
+    return res.ok ? (await res.json()) as SolvedByDifficultyResponse : null
+  } catch { return null }
+}

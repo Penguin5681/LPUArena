@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useHeartbeat } from '../hooks/useHeartbeat'
 import QuestionList from './QuestionList'
 import QuestionEditor from './QuestionEditor'
 import DeductionsPanel from './DeductionsPanel'
+import SidebarStats from './SidebarStats'
 import type { Question } from '../lib/questions'
 import './Dashboard.css'
 
@@ -12,6 +13,18 @@ export default function Dashboard() {
   const [activeQ, setActiveQ]         = useState<Question | null>(null)
   const [collapsed, setCollapsed]     = useState(false)
   const [showDeductions, setShowDeductions] = useState(false)
+
+  // keep a ref to the full question list so random pick is instant
+  const allQuestionsRef = useRef<Question[]>([])
+
+  const handleNext = () => {
+    const list = allQuestionsRef.current
+    if (list.length === 0) return
+    // pick a random question that isn't the current one
+    const pool = activeQ ? list.filter(q => q.id !== activeQ.id) : list
+    const pick = pool[Math.floor(Math.random() * pool.length)]
+    if (pick) setActiveQ(pick)
+  }
 
   // silent heartbeat — fire-and-forget every 30s
   useHeartbeat(activeQ ? `/problem/${activeQ.slug}` : '/dashboard')
@@ -74,6 +87,9 @@ export default function Dashboard() {
           </button>
         </nav>
 
+        {/* stats */}
+        <SidebarStats collapsed={collapsed} />
+
         {/* user */}
         <div className="db-user">
           <div className="db-user-avatar" title={user?.name}>
@@ -103,8 +119,8 @@ export default function Dashboard() {
       {/* ── main ── */}
       <div className="db-main">
         <div className="db-content">
-          {!activeQ && <QuestionList onSelect={setActiveQ} />}
-          {activeQ  && <QuestionEditor question={activeQ} onBack={() => setActiveQ(null)} />}
+          {!activeQ && <QuestionList onSelect={setActiveQ} onLoaded={qs => { allQuestionsRef.current = qs }} />}
+          {activeQ  && <QuestionEditor question={activeQ} onBack={() => setActiveQ(null)} onNext={handleNext} />}
         </div>
 
         {showDeductions && (

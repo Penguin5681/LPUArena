@@ -44,9 +44,9 @@ def solve():
 solve()`,
 }
 
-interface Props { question: Question; onBack: () => void }
+interface Props { question: Question; onBack: () => void; onNext: () => void }
 
-export default function QuestionEditor({ question, onBack }: Props) {
+export default function QuestionEditor({ question, onBack, onNext }: Props) {
   const { reportPaste, reportBurst } = useSecurity()
 
   const [lang, setLang]           = useState<Lang>('cpp')
@@ -158,6 +158,16 @@ export default function QuestionEditor({ question, onBack }: Props) {
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           Problems
+        </button>
+
+        <button className="qe-next" onClick={onNext} aria-label="Next random problem" title="Next random problem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+            <polyline points="16 3 21 3 21 8"/>
+            <line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/>
+            <line x1="15" y1="15" x2="21" y2="21"/>
+          </svg>
+          Random
         </button>
 
         <div className="qe-meta">
