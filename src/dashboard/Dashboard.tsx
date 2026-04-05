@@ -5,6 +5,7 @@ import QuestionList from './QuestionList'
 import QuestionEditor from './QuestionEditor'
 import DeductionsPanel from './DeductionsPanel'
 import SidebarStats from './SidebarStats'
+import Avatar from '../components/Avatar'
 import type { Question } from '../lib/questions'
 import './Dashboard.css'
 
@@ -92,9 +93,11 @@ export default function Dashboard() {
 
         {/* user */}
         <div className="db-user">
-          <div className="db-user-avatar" title={user?.name}>
-            {user?.name?.[0]?.toUpperCase() ?? '?'}
-          </div>
+          <Avatar
+            seed={user?.registrationNumber ?? user?.email ?? ''}
+            name={user?.name ?? ''}
+            size={28}
+          />
           {!collapsed && (
             <div className="db-user-info">
               <span className="db-user-name">{user?.name}</span>
