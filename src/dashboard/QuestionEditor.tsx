@@ -86,18 +86,26 @@ export default function QuestionEditor({ question, onBack }: Props) {
       })
       setResult(res.result)
 
-      // log submission to leaderboard (fire-and-forget)
-      const verdict   = getVerdict(res.result.status)
-      const isCorrect = verdict === 'accepted'
+      // log every submission regardless of verdict
       logSubmission({
         questionId: question.id,
         languageId: JUDGE0_LANG_ID[lang],
         sourceCode: prepared,
         verdict:    res.result.status.description,
-        isCorrect,
+        isCorrect:  getVerdict(res.result.status) === 'accepted',
       })
     } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : 'Submission failed')
+      const msg = e instanceof Error ? e.message : 'Submission failed'
+      setSubmitError(msg)
+
+      // still log the failed attempt so the server has a full record
+      logSubmission({
+        questionId: question.id,
+        languageId: JUDGE0_LANG_ID[lang],
+        sourceCode: prepareCode(code[lang], lang),
+        verdict:    'Submission Error',
+        isCorrect:  false,
+      })
     } finally {
       setSubmitting(false)
     }
