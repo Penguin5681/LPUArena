@@ -88,7 +88,7 @@ export default function QuestionEditor({ question, onBack }: Props) {
 
       // log every submission regardless of verdict
       logSubmission({
-        questionId: question.id,
+        questionId: parseInt(question.id, 10),
         languageId: JUDGE0_LANG_ID[lang],
         sourceCode: prepared,
         verdict:    res.result.status.description,
@@ -100,7 +100,7 @@ export default function QuestionEditor({ question, onBack }: Props) {
 
       // still log the failed attempt so the server has a full record
       logSubmission({
-        questionId: question.id,
+        questionId: parseInt(question.id, 10),
         languageId: JUDGE0_LANG_ID[lang],
         sourceCode: prepareCode(code[lang], lang),
         verdict:    'Submission Error',

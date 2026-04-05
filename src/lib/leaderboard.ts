@@ -16,7 +16,7 @@ export interface EventResponse {
 }
 
 export interface SubmissionPayload {
-  questionId:  number | string
+  questionId:  number
   languageId:  number
   sourceCode:  string
   verdict:     string
