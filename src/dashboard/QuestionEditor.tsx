@@ -2,7 +2,10 @@ import { useState, useRef } from 'react'
 import Editor, { type OnMount } from '@monaco-editor/react'
 import type * as MonacoType from 'monaco-editor'
 import type { Question } from '../lib/questions'
-import { apiSubmit, JUDGE0_LANG_ID, prepareCode, type Judge0Result, getVerdict } from '../lib/judge0'
+import {
+  apiSubmit, startPolling,
+  JUDGE0_LANG_ID, prepareCode, type Judge0Result, getVerdict,
+} from '../lib/judge0'
 import { logSubmission } from '../lib/leaderboard'
 import { useSecurity } from '../security/SecurityContext'
 import SubmitResult from './SubmitResult'
@@ -69,9 +72,91 @@ export default function QuestionEditor({ question, onBack, onNext }: Props) {
   // submission state
   const [stdin, setStdin]             = useState('')
   const [submitting, setSubmitting]   = useState(false)
+  const [pollStatus, setPollStatus]   = useState<string | null>(null)  // 'queued' | 'processing' | 'timed_out'
   const [result, setResult]           = useState<Judge0Result | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [showStdin, setShowStdin]     = useState(false)
+  const cancelPollRef = useRef<(() => void) | null>(null)
+
+  const stopPolling = () => {
+    if (cancelPollRef.current) { cancelPollRef.current(); cancelPollRef.current = null }
+  }
+
+  const handleSubmit = async () => {
+    if (submitting) return
+    setSubmitError(null)
+    setResult(null)
+    setPollStatus(null)
+    setSubmitting(true)
+    stopPolling()
+
+    const prepared = prepareCode(code[lang], lang)
+
+    try {
+      const { job } = await apiSubmit({
+        source_code:     prepared,
+        language_id:     JUDGE0_LANG_ID[lang],
+        stdin:           stdin || exampleStdin,
+        expected_output: expectedOutput,
+        cpu_time_limit:  2,
+        memory_limit:    128000,
+      })
+
+      setPollStatus('queued')
+
+      cancelPollRef.current = startPolling(job.id, {
+        onStatusChange: (status) => setPollStatus(status),
+        onResult: (jobResult) => {
+          setResult(jobResult)
+          setPollStatus(null)
+          setSubmitting(false)
+          cancelPollRef.current = null
+          logSubmission({
+            questionId: parseInt(question.id, 10),
+            languageId: JUDGE0_LANG_ID[lang],
+            sourceCode: prepared,
+            verdict:    jobResult.status.description,
+            isCorrect:  getVerdict(jobResult.status) === 'accepted',
+          })
+        },
+        onError: (msg) => {
+          setSubmitError(msg)
+          setPollStatus(null)
+          setSubmitting(false)
+          cancelPollRef.current = null
+          logSubmission({
+            questionId: parseInt(question.id, 10),
+            languageId: JUDGE0_LANG_ID[lang],
+            sourceCode: prepared,
+            verdict:    'Submission Error',
+            isCorrect:  false,
+          })
+        },
+        onTimeout: () => {
+          setPollStatus('timed_out')
+          setSubmitting(false)
+          cancelPollRef.current = null
+        },
+      })
+
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Submission failed'
+      setSubmitError(msg)
+      setSubmitting(false)
+      logSubmission({
+        questionId: parseInt(question.id, 10),
+        languageId: JUDGE0_LANG_ID[lang],
+        sourceCode: prepared,
+        verdict:    'Submission Error',
+        isCorrect:  false,
+      })
+    }
+  }
+
+  const handleManualRefresh = () => {
+    setPollStatus(null)
+    setSubmitError(null)
+  }
 
   // Monaco mount — block Ctrl/Cmd+V, intercept paste, store ref
   const handleEditorMount: OnMount = (editor, monaco) => {
@@ -105,49 +190,6 @@ export default function QuestionEditor({ question, onBack, onNext }: Props) {
   // Build expected output from first example
   const expectedOutput = question.examples[0]?.output ?? ''
   const exampleStdin   = question.examples[0]?.input  ?? ''
-
-  const handleSubmit = async () => {
-    if (submitting) return
-    setSubmitError(null)
-    setResult(null)
-    setSubmitting(true)
-
-    try {
-      const prepared = prepareCode(code[lang], lang)
-      const res = await apiSubmit({
-        source_code:     prepared,
-        language_id:     JUDGE0_LANG_ID[lang],
-        stdin:           stdin || exampleStdin,
-        expected_output: expectedOutput,
-        cpu_time_limit:  2,
-        memory_limit:    128000,
-      })
-      setResult(res.result)
-
-      // log every submission regardless of verdict
-      logSubmission({
-        questionId: parseInt(question.id, 10),
-        languageId: JUDGE0_LANG_ID[lang],
-        sourceCode: prepared,
-        verdict:    res.result.status.description,
-        isCorrect:  getVerdict(res.result.status) === 'accepted',
-      })
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Submission failed'
-      setSubmitError(msg)
-
-      // still log the failed attempt so the server has a full record
-      logSubmission({
-        questionId: parseInt(question.id, 10),
-        languageId: JUDGE0_LANG_ID[lang],
-        sourceCode: prepareCode(code[lang], lang),
-        verdict:    'Submission Error',
-        isCorrect:  false,
-      })
-    } finally {
-      setSubmitting(false)
-    }
-  }
 
   return (
     <div className="qe">
@@ -401,6 +443,14 @@ export default function QuestionEditor({ question, onBack, onNext }: Props) {
             {submitError && (
               <span className="qe-submit-error" role="alert">{submitError}</span>
             )}
+            {pollStatus === 'timed_out' && (
+              <span className="qe-submit-timeout">
+                Still processing…
+                <button className="qe-refresh-btn" onClick={handleManualRefresh}>
+                  Refresh
+                </button>
+              </span>
+            )}
             <button
               className="qe-submit-btn"
               onClick={handleSubmit}
@@ -410,7 +460,9 @@ export default function QuestionEditor({ question, onBack, onNext }: Props) {
               {submitting ? (
                 <>
                   <span className="qe-submit-spinner" aria-hidden="true" />
-                  Running…
+                  {pollStatus === 'queued'     ? 'Queued…'     :
+                   pollStatus === 'processing' ? 'Running…'    :
+                   'Submitting…'}
                 </>
               ) : (
                 <>
