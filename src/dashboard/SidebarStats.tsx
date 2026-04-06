@@ -3,11 +3,22 @@ import {
   getMyPoints, getMySolvedByDifficulty,
   type PointsData, type SolvedByDifficultyData,
 } from '../lib/leaderboard'
+import type { SolvedQuestion } from '../lib/questions'
 import './SidebarStats.css'
 
-interface Props { collapsed: boolean }
+interface Props {
+  collapsed: boolean
+  solvedQuestions?: SolvedQuestion[]
+  onOpenSolvedQuestion?: (questionId: number) => void
+}
 
-export default function SidebarStats({ collapsed }: Props) {
+function formatSolvedDate(iso: string) {
+  const dt = new Date(iso)
+  if (Number.isNaN(dt.getTime())) return ''
+  return dt.toLocaleDateString([], { month: 'short', day: 'numeric' })
+}
+
+export default function SidebarStats({ collapsed, solvedQuestions = [], onOpenSolvedQuestion }: Props) {
   const [points, setPoints]   = useState<PointsData | null>(null)
   const [solved, setSolved]   = useState<SolvedByDifficultyData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -28,6 +39,9 @@ export default function SidebarStats({ collapsed }: Props) {
         <span className="ss-score-icon">⬡</span>
         {!loading && points && (
           <span className="ss-score-mini">{points.score}</span>
+        )}
+        {!loading && solvedQuestions.length > 0 && (
+          <span className="ss-solved-mini">✓{solvedQuestions.length}</span>
         )}
       </div>
     )
@@ -86,6 +100,32 @@ export default function SidebarStats({ collapsed }: Props) {
           </div>
         </div>
       )}
+
+      <div className="ss-solved-list">
+        <div className="ss-solved-list-header">
+          <span className="ss-solved-list-title">Solved Questions</span>
+          <span className="ss-solved-list-count">{solvedQuestions.length}</span>
+        </div>
+
+        {solvedQuestions.length === 0 ? (
+          <div className="ss-solved-empty">No solved questions yet</div>
+        ) : (
+          <div className="ss-solved-items">
+            {solvedQuestions.map(q => (
+              <button
+                key={q.id}
+                className="ss-solved-item"
+                onClick={() => onOpenSolvedQuestion?.(q.id)}
+                title={`Open statement: ${q.title}`}
+              >
+                <span className={`ss-solved-pill ss-solved-pill--${q.difficulty}`}>{q.difficulty}</span>
+                <span className="ss-solved-item-title">{q.title}</span>
+                <span className="ss-solved-item-date">{formatSolvedDate(q.first_solved_at)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
