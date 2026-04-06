@@ -110,30 +110,29 @@
 /* countdown */
 .cs-countdown {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start;   /* units and seps share the same top */
   justify-content: center;
   gap: 0;
   margin-bottom: 52px;
-  position: relative;
 }
 
 .cs-unit {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .cs-unit-num {
   font-family: 'Bebas Neue', 'Inter', sans-serif;
-  font-size: clamp(52px, 9vw, 96px);
+  font-size: clamp(48px, 8vw, 92px);
   font-weight: 400;
   color: #f5f5f0;
   line-height: 1;
   letter-spacing: -1px;
   text-shadow: 0 0 30px rgba(232,255,71,0.12);
   transition: color 0.3s;
+  display: block;
 }
 
 .cs-unit:last-child .cs-unit-num {
@@ -147,18 +146,23 @@
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: #444;
-  margin-top: 6px;
+  margin-top: 8px;
+  white-space: nowrap;
 }
 
+/* separator — sits between units as a flex sibling */
 .cs-sep {
   font-family: 'Bebas Neue', 'Inter', sans-serif;
-  font-size: clamp(52px, 9vw, 96px);
-  color: #2a2a2a;
+  font-size: clamp(48px, 8vw, 92px);
+  color: #2e2e2e;
   line-height: 1;
+  /* push it down by the same amount as the label height so it
+     visually centers against the number, not the whole unit */
   align-self: flex-start;
-  padding: 0;
-  margin: 0 -8px;
+  padding-top: 0;
+  flex-shrink: 0;
   pointer-events: none;
+  user-select: none;
 }
 
 /* live badge */
@@ -219,7 +223,18 @@
 }
 
 /* responsive */
-@media (max-width: 480px) {
-  .cs-unit { padding: 0 10px; }
-  .cs-sep  { margin: 0 -4px; }
+@media (max-width: 600px) {
+  .cs-content    { padding: 32px 20px; }
+  .cs-brand      { margin-bottom: 36px; }
+  .cs-headline   { letter-spacing: -1px; margin-bottom: 18px; }
+  .cs-sub        { font-size: 14px; margin-bottom: 36px; }
+  .cs-unit       { padding: 0 8px; }
+  .cs-unit-label { font-size: 9px; letter-spacing: 1.5px; }
+  .cs-countdown  { margin-bottom: 36px; }
+  .cs-tagline    { font-size: 10px; letter-spacing: 1.5px; }
+}
+
+@media (max-width: 380px) {
+  .cs-unit  { padding: 0 4px; }
+  .cs-sub   { font-size: 13px; }
 }
