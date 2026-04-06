@@ -9,6 +9,21 @@ export type Difficulty = 'easy' | 'medium' | 'hard'
 
 export interface Example  { input: string; output: string }
 
+export interface SolvedQuestion {
+  id: number
+  title: string
+  slug: string
+  topic: string
+  difficulty: Difficulty
+  points: number
+  first_solved_at: string
+}
+
+export interface SolvedQuestionsResponse {
+  total: number
+  data: SolvedQuestion[]
+}
+
 export interface Question {
   id: string
   title: string
@@ -62,4 +77,21 @@ export async function apiGetAllQuestions(): Promise<Question[]> {
   const data: Question[] = json.data ?? json
   writeCache(data)
   return data
+}
+
+export async function apiGetMySolvedQuestions(): Promise<SolvedQuestionsResponse> {
+  const token = getToken()
+  const res = await fetch(`${BASE}/api/questions/solved`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const json = await res.json().catch(() => ({}))
+
+  trackApiCall('/api/questions/solved', 'GET', res.status)
+
+  if (!res.ok) throw new Error(json?.message ?? `Failed (${res.status})`)
+
+  return {
+    total: json.total ?? 0,
+    data: Array.isArray(json.data) ? json.data as SolvedQuestion[] : [],
+  }
 }

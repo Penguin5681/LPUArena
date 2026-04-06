@@ -1,22 +1,104 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useHeartbeat } from '../hooks/useHeartbeat'
 import QuestionList from './QuestionList'
 import QuestionEditor from './QuestionEditor'
 import DeductionsPanel from './DeductionsPanel'
 import SidebarStats from './SidebarStats'
+import SolvedQuestionModal from './SolvedQuestionModal.tsx'
 import Avatar from '../components/Avatar'
-import type { Question } from '../lib/questions'
+import { apiGetAllQuestions, apiGetMySolvedQuestions, type Question, type SolvedQuestion } from '../lib/questions'
 import './Dashboard.css'
 
 export default function Dashboard() {
   const { user, logout }    = useAuth()
   const [activeQ, setActiveQ]         = useState<Question | null>(null)
+  const [modalQuestion, setModalQuestion] = useState<Question | null>(null)
+  const [solvedQuestions, setSolvedQuestions] = useState<SolvedQuestion[]>([])
+  const [allQuestions, setAllQuestions] = useState<Question[]>([])
+  const [refreshNonce, setRefreshNonce] = useState(0)
   const [collapsed, setCollapsed]     = useState(false)
   const [showDeductions, setShowDeductions] = useState(false)
 
   // keep a ref to the full question list so random pick is instant
   const allQuestionsRef = useRef<Question[]>([])
+  const prevActiveQRef = useRef<Question | null>(null)
+
+  const refreshSolved = useCallback(async () => {
+    try {
+      const res = await apiGetMySolvedQuestions()
+      const sorted = [...res.data].sort(
+        (a, b) => new Date(b.first_solved_at).getTime() - new Date(a.first_solved_at).getTime(),
+      )
+      setSolvedQuestions(sorted)
+    } catch {
+      setSolvedQuestions([])
+    }
+  }, [])
+
+  useEffect(() => {
+    Promise.resolve().then(() => refreshSolved())
+  }, [refreshSolved])
+
+  const triggerRefresh = useCallback((forceQuestionReload = true) => {
+    refreshSolved()
+    if (forceQuestionReload) {
+      setRefreshNonce(n => n + 1)
+    }
+  }, [refreshSolved])
+
+  // Auto-refresh dashboard data periodically when user is on the problems list.
+  useEffect(() => {
+    if (activeQ) return
+    const id = window.setInterval(() => {
+      triggerRefresh(true)
+    }, 45000)
+    return () => window.clearInterval(id)
+  }, [activeQ, triggerRefresh])
+
+  // Refresh solved/question data when returning from editor to list.
+  useEffect(() => {
+    const wasInEditor = prevActiveQRef.current !== null
+    const nowInList = activeQ === null
+    if (wasInEditor && nowInList) {
+      Promise.resolve().then(() => triggerRefresh(true))
+    }
+    prevActiveQRef.current = activeQ
+  }, [activeQ, triggerRefresh])
+
+  const solvedQuestionIds = useMemo(
+    () => new Set(solvedQuestions.map(q => q.id)),
+    [solvedQuestions],
+  )
+
+  const solvedQuestionSlugs = useMemo(
+    () => new Set(solvedQuestions.map(q => q.slug.trim().toLowerCase())),
+    [solvedQuestions],
+  )
+
+  const handleOpenSolvedModal = useCallback(async (questionId: number) => {
+    const fromState = allQuestions.find(q => Number(q.id) === questionId)
+    const fromRef = allQuestionsRef.current.find(q => Number(q.id) === questionId)
+    const target = fromState ?? fromRef
+    if (target) {
+      setModalQuestion(target)
+      return
+    }
+
+    try {
+      const loaded = await apiGetAllQuestions()
+      allQuestionsRef.current = loaded
+      setAllQuestions(loaded)
+      const lateTarget = loaded.find(q => Number(q.id) === questionId)
+      if (lateTarget) setModalQuestion(lateTarget)
+    } catch {
+      // no-op: modal open is best-effort when full question data is unavailable
+    }
+  }, [allQuestions])
+
+  const handleSolvedRowClick = useCallback((q: Question) => {
+    setModalQuestion(q)
+  }, [])
 
   const handleNext = () => {
     const list = allQuestionsRef.current
@@ -89,7 +171,11 @@ export default function Dashboard() {
         </nav>
 
         {/* stats */}
-        <SidebarStats collapsed={collapsed} />
+        <SidebarStats
+          collapsed={collapsed}
+          solvedQuestions={solvedQuestions}
+          onOpenSolvedQuestion={handleOpenSolvedModal}
+        />
 
         {/* user */}
         <div className="db-user">
@@ -122,7 +208,19 @@ export default function Dashboard() {
       {/* ── main ── */}
       <div className="db-main">
         <div className="db-content">
-          {!activeQ && <QuestionList onSelect={setActiveQ} onLoaded={qs => { allQuestionsRef.current = qs }} />}
+          {!activeQ && (
+            <QuestionList
+              onSelect={setActiveQ}
+              onSelectSolved={handleSolvedRowClick}
+              solvedQuestionIds={solvedQuestionIds}
+              solvedQuestionSlugs={solvedQuestionSlugs}
+              refreshNonce={refreshNonce}
+              onLoaded={qs => {
+                allQuestionsRef.current = qs
+                setAllQuestions(qs)
+              }}
+            />
+          )}
           {activeQ  && <QuestionEditor question={activeQ} onBack={() => setActiveQ(null)} onNext={handleNext} />}
         </div>
 
@@ -130,6 +228,11 @@ export default function Dashboard() {
           <DeductionsPanel onClose={() => setShowDeductions(false)} />
         )}
       </div>
+
+      <SolvedQuestionModal
+        question={modalQuestion}
+        onClose={() => setModalQuestion(null)}
+      />
     </div>
   )
 }

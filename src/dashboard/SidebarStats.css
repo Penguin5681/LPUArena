@@ -30,6 +30,13 @@
   letter-spacing: 0.5px;
 }
 
+.ss-solved-mini {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: #4ade80;
+  letter-spacing: 0.5px;
+}
+
 /* loading */
 .ss-loading {
   display: flex;
@@ -167,4 +174,122 @@
   width: 16px;
   text-align: right;
   flex-shrink: 0;
+}
+
+.ss-solved-list {
+  margin-top: 12px;
+  border-top: 1px solid #1a1a1a;
+  padding-top: 10px;
+}
+
+.ss-solved-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ss-solved-list-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.ss-solved-list-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: #4ade80;
+}
+
+.ss-solved-empty {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  color: #444;
+  padding: 4px 0;
+}
+
+.ss-solved-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+
+.ss-solved-items::-webkit-scrollbar {
+  width: 3px;
+}
+
+.ss-solved-items::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+}
+
+.ss-solved-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  border: 1px solid #1f1f1f;
+  background: #101010;
+  color: #bbb;
+  padding: 6px 7px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.ss-solved-item:hover {
+  border-color: #2f2f2f;
+  background: #141414;
+}
+
+.ss-solved-item:focus-visible {
+  outline: 1px solid rgba(232, 255, 71, 0.35);
+  outline-offset: 1px;
+}
+
+.ss-solved-pill {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 2px 4px;
+}
+
+.ss-solved-pill--easy {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.ss-solved-pill--medium {
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.12);
+}
+
+.ss-solved-pill--hard {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.ss-solved-item-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  color: #d2d2ca;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ss-solved-item-date {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: #666;
 }

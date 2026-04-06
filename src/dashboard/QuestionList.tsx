@@ -1,9 +1,13 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { apiGetAllQuestions, clearQuestionsCache, type Question } from '../lib/questions'
 import './QuestionList.css'
 
 interface Props {
   onSelect:  (q: Question) => void
+  onSelectSolved?: (q: Question) => void
+  solvedQuestionIds?: Set<number>
+  solvedQuestionSlugs?: Set<string>
+  refreshNonce?: number
   onLoaded?: (questions: Question[]) => void
 }
 
@@ -12,7 +16,7 @@ type SortBy = 'default' | 'title' | 'difficulty'
 
 const DIFF_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 }
 
-export default function QuestionList({ onSelect, onLoaded }: Props) {
+export default function QuestionList({ onSelect, onSelectSolved, solvedQuestionIds, solvedQuestionSlugs, refreshNonce = 0, onLoaded }: Props) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading]     = useState(true)
   const [error, setError]         = useState<string | null>(null)
@@ -23,6 +27,12 @@ export default function QuestionList({ onSelect, onLoaded }: Props) {
   const [topic, setTopic]     = useState('all')
   const [sortBy, setSortBy]   = useState<SortBy>('default')
 
+  const onLoadedRef = useRef(onLoaded)
+
+  useEffect(() => {
+    onLoadedRef.current = onLoaded
+  }, [onLoaded])
+
   const load = useCallback(async (bust = false) => {
     if (bust) clearQuestionsCache()
     setLoading(true); setError(null)
@@ -31,7 +41,7 @@ export default function QuestionList({ onSelect, onLoaded }: Props) {
       const data = await apiGetAllQuestions()
       setFromCache(Date.now() - before < 30)
       setQuestions(data)
-      onLoaded?.(data)
+      onLoadedRef.current?.(data)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load')
     } finally {
@@ -39,7 +49,9 @@ export default function QuestionList({ onSelect, onLoaded }: Props) {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load(refreshNonce > 0)
+  }, [load, refreshNonce])
 
   const topics = useMemo(() =>
     ['all', ...Array.from(new Set(questions.map(q => q.topic))).sort()],
@@ -64,6 +76,22 @@ export default function QuestionList({ onSelect, onLoaded }: Props) {
     if (sortBy === 'difficulty') list = [...list].sort((a,b) => DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty])
     return list
   }, [questions, search, diff, topic, sortBy])
+
+  const isSolvedQuestion = useCallback((q: Question) => {
+    const numericId = Number(q.id)
+    const byId = Number.isFinite(numericId) && (solvedQuestionIds?.has(numericId) ?? false)
+    const bySlug = (solvedQuestionSlugs?.has(q.slug.trim().toLowerCase()) ?? false)
+    return byId || bySlug
+  }, [solvedQuestionIds, solvedQuestionSlugs])
+
+  const handleRowSelect = useCallback((q: Question) => {
+    const solved = isSolvedQuestion(q)
+    if (solved && onSelectSolved) {
+      onSelectSolved(q)
+      return
+    }
+    onSelect(q)
+  }, [isSolvedQuestion, onSelect, onSelectSolved])
 
   return (
     <div className="ql">
@@ -199,19 +227,29 @@ export default function QuestionList({ onSelect, onLoaded }: Props) {
                   </td>
                 </tr>
               )}
-              {filtered.map((q, i) => (
+              {filtered.map((q, i) => {
+                const isSolved = isSolvedQuestion(q)
+                return (
                 <tr
                   key={q.id}
-                  className="ql-row"
-                  onClick={() => onSelect(q)}
+                  className={`ql-row ${isSolved ? 'ql-row--solved' : ''}`}
+                  onClick={() => handleRowSelect(q)}
                   tabIndex={0}
-                  onKeyDown={e => e.key === 'Enter' && onSelect(q)}
+                  onKeyDown={e => {
+                    if (e.key !== 'Enter') return
+                    handleRowSelect(q)
+                  }}
                   role="button"
-                  aria-label={`Open ${q.title}`}
+                  aria-label={isSolved ? `Open solved statement for ${q.title}` : `Open ${q.title}`}
                 >
                   <td className="ql-td ql-td--num">{i + 1}</td>
                   <td className="ql-td ql-td--title">
                     <span className="ql-row-title">{q.title}</span>
+                    {isSolved && (
+                      <span className="ql-solved-badge" title="Solved">
+                        Solved
+                      </span>
+                    )}
                   </td>
                   <td className="ql-td ql-td--topic">
                     <span className="ql-topic">{q.topic}</span>
@@ -228,7 +266,8 @@ export default function QuestionList({ onSelect, onLoaded }: Props) {
                     <span className="ql-pts">⬡ {q.points}</span>
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         )}
