@@ -3,7 +3,7 @@ import Editor, { type OnMount } from '@monaco-editor/react'
 import type * as MonacoType from 'monaco-editor'
 import type { Question } from '../lib/questions'
 import {
-  apiSubmit, startPolling,
+  apiSubmit, startPolling, detectHardcode,
   JUDGE0_LANG_ID, prepareCode, type Judge0Result, getVerdict,
 } from '../lib/judge0'
 import { logSubmission } from '../lib/leaderboard'
@@ -91,6 +91,20 @@ export default function QuestionEditor({ question, onBack, onNext }: Props) {
     stopPolling()
 
     const prepared = prepareCode(code[lang], lang)
+
+    // reject hardcoded output before hitting the API
+    if (detectHardcode(prepared, expectedOutput, lang)) {
+      setSubmitError('Hardcoded output detected. Write a solution that reads input and computes the answer.')
+      setSubmitting(false)
+      logSubmission({
+        questionId: parseInt(question.id, 10),
+        languageId: JUDGE0_LANG_ID[lang],
+        sourceCode: prepared,
+        verdict:    'Hardcode Detected',
+        isCorrect:  false,
+      })
+      return
+    }
 
     try {
       const { job } = await apiSubmit({

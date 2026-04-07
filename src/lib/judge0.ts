@@ -77,6 +77,67 @@ export function prepareCode(code: string, lang: string): string {
   return code
 }
 
+// ── Hardcode / static-output detection ────────────────────────
+// Detects code that simply prints the expected output without solving the problem.
+// Checks:
+//   1. The expected output appears as a string literal in the code.
+//   2. The code contains no meaningful logic (no loops, conditions, arithmetic, input reads).
+export function detectHardcode(code: string, expectedOutput: string, lang: string): boolean {
+  if (!expectedOutput.trim()) return false
+
+  const c = code.toLowerCase()
+  const expected = expectedOutput.trim().toLowerCase()
+
+  // Check if the expected output is literally present as a string in the code
+  const containsLiteral =
+    code.includes(`"${expectedOutput.trim()}"`) ||
+    code.includes(`'${expectedOutput.trim()}'`) ||
+    // multi-token: each token of the expected output appears quoted
+    expected.split(/\s+/).every(token =>
+      token.length > 0 && (code.includes(`"${token}"`) || code.includes(`'${token}'`))
+    )
+
+  if (!containsLiteral) return false
+
+  // If the literal is present, check whether there's any real logic
+  const hasLogic = (() => {
+    if (lang === 'python') {
+      return (
+        /\bfor\b/.test(c)      ||
+        /\bwhile\b/.test(c)    ||
+        /\bif\b/.test(c)       ||
+        /\binput\b/.test(c)    ||
+        /\bsys\.stdin\b/.test(c) ||
+        /[+\-*/%]/.test(c)
+      )
+    }
+    if (lang === 'cpp') {
+      return (
+        /\bfor\b/.test(c)      ||
+        /\bwhile\b/.test(c)    ||
+        /\bif\b/.test(c)       ||
+        /\bcin\b/.test(c)      ||
+        /scanf/.test(c)        ||
+        /[+\-*/%]/.test(c)
+      )
+    }
+    if (lang === 'java') {
+      return (
+        /\bfor\b/.test(c)      ||
+        /\bwhile\b/.test(c)    ||
+        /\bif\b/.test(c)       ||
+        /scanner/.test(c)      ||
+        /readline/.test(c)     ||
+        /[+\-*/%]/.test(c)
+      )
+    }
+    return true // unknown lang — don't block
+  })()
+
+  // Flag only if literal present AND no real logic
+  return !hasLogic
+}
+
 // ── Submit (queue job) ─────────────────────────────────────────
 export async function apiSubmit(payload: SubmitPayload): Promise<SubmitResponse> {
   const token = getToken()

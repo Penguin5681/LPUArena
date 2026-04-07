@@ -1,6 +1,7 @@
 import './App.css'
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from './context/AuthContext'
+import { usePlatformConfig } from './hooks/usePlatformConfig'
 import LeftPanel     from './components/login/LeftPanel'
 import TopBar        from './components/login/TopBar'
 import LoginForm     from './components/login/LoginForm'
@@ -8,11 +9,13 @@ import SignupForm    from './components/signup/SignupForm'
 import BottomBar     from './components/login/BottomBar'
 import SecurityShell from './security/SecurityShell'
 import Dashboard     from './dashboard/Dashboard'
+import ComingSoon    from './pages/ComingSoon'
 
 const IS_PROD = import.meta.env.VITE_APP_ENV === 'production'
 
 export default function App() {
   const { user, loading } = useAuth()
+  const platformState     = usePlatformConfig()
 
   const [page, setPage]           = useState<'login' | 'signup'>('login')
   const [animating, setAnimating] = useState(false)
@@ -34,7 +37,20 @@ export default function App() {
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
 
-  // ── loading splash ──
+  // ── platform config: loading or coming soon ──
+  if (platformState === 'loading' || (platformState === 'coming-soon' && loading)) {
+    return (
+      <div className="auth-loading">
+        <span className="auth-loading-mark">◈</span>
+      </div>
+    )
+  }
+
+  if (platformState === 'coming-soon') {
+    return <ComingSoon />
+  }
+
+  // ── auth loading ──
   if (loading) {
     return (
       <div className="auth-loading">
@@ -59,7 +75,7 @@ export default function App() {
         <div className="form-stage">
           <div className={[
             'form-slot',
-            page !== 'login' && animating   ? `exit-${direction}`  : '',
+            page !== 'login' && animating    ? `exit-${direction}`  : '',
             page === 'login' && animating    ? `enter-${direction}` : '',
             visible === 'login' && !animating ? 'settled' : '',
             visible !== 'login' && !animating ? 'hidden'  : '',
@@ -69,8 +85,8 @@ export default function App() {
 
           <div className={[
             'form-slot',
-            page === 'signup' && animating   ? `enter-${direction}` : '',
-            page !== 'signup' && animating   ? `exit-${direction}`  : '',
+            page === 'signup' && animating    ? `enter-${direction}` : '',
+            page !== 'signup' && animating    ? `exit-${direction}`  : '',
             visible === 'signup' && !animating ? 'settled' : '',
             visible !== 'signup' && !animating ? 'hidden'  : '',
           ].filter(Boolean).join(' ')}>
