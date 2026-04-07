@@ -198,3 +198,22 @@ export async function getMySolvedByDifficulty(): Promise<SolvedByDifficultyRespo
     return res.ok ? (await res.json()) as SolvedByDifficultyResponse : null
   } catch { return null }
 }
+
+// ── Platform config ────────────────────────────────────────────
+
+export interface PlatformConfig {
+  isComingSoon: boolean
+  updatedAt:    string
+}
+
+export async function getPlatformConfig(): Promise<PlatformConfig | null> {
+  try {
+    const res = await fetch(`${BASE}/api/leaderboard/config`)
+    if (!res.ok) return null
+    const json = await res.json()
+    trackApiCall('/api/leaderboard/config', 'GET', res.status)
+    return (json?.data ?? null) as PlatformConfig | null
+  } catch {
+    return null
+  }
+}
