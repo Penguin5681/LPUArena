@@ -17,11 +17,16 @@ export interface AuthResponse {
 }
 
 // ── token persistence ──────────────────────────────────────────
-const TOKEN_KEY = 'aa_token'
+const TOKEN_KEY         = 'aa_token'
+const SESSION_TOKEN_KEY = 'aa_session_token'
 
-export const saveToken  = (token: string) => localStorage.setItem(TOKEN_KEY, token)
-export const getToken   = ()              => localStorage.getItem(TOKEN_KEY)
-export const clearToken = ()              => localStorage.removeItem(TOKEN_KEY)
+export const saveToken          = (token: string) => localStorage.setItem(TOKEN_KEY, token)
+export const getToken           = ()              => localStorage.getItem(TOKEN_KEY)
+export const clearToken         = ()              => localStorage.removeItem(TOKEN_KEY)
+
+export const saveSessionToken   = (t: string) => localStorage.setItem(SESSION_TOKEN_KEY, t)
+export const getSessionToken    = ()          => localStorage.getItem(SESSION_TOKEN_KEY)
+export const clearSessionToken  = ()          => localStorage.removeItem(SESSION_TOKEN_KEY)
 
 // ── helpers ────────────────────────────────────────────────────
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -73,4 +78,9 @@ export async function apiSignin(payload: {
 
 export async function apiMe(): Promise<{ user: AuthUser }> {
   return request<{ user: AuthUser }>('/api/auth/me')
+}
+
+// ── Session token ──────────────────────────────────────────────
+export async function apiGetSessionToken(): Promise<{ sessionToken: string }> {
+  return request<{ sessionToken: string }>('/api/auth/session-token')
 }
