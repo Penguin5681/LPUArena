@@ -1,20 +1,15 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { logEvent } from '../lib/leaderboard'
-import { useToast } from '../context/ToastContext'
 
 const IS_PROD = import.meta.env.VITE_APP_ENV === 'production'
-const FOCUS_DEBOUNCE = 2000
 
 const EVENT_TITLES: Record<string, string> = {
-  out_of_focus:    '🚨 TAB SWITCH DETECTED',
   copy_paste:      '🚨 PASTE ATTEMPT BLOCKED',
   fullscreen_exit: '🚨 FULLSCREEN VIOLATION',
   burst_typing:    '🚨 CODE INJECTION DETECTED',
 }
 
 const EVENT_MESSAGES: Record<string, (penalty: number, count: number, extra?: number) => string> = {
-  out_of_focus: (p, c) =>
-    `Leaving the exam window is strictly prohibited. This incident has been recorded.\n−${p} point${p !== 1 ? 's' : ''} deducted from your leaderboard score. (Violation #${c})`,
   copy_paste: (p, c) =>
     `Pasting external content is not allowed. This attempt has been logged and reported.\n−${p} point${p !== 1 ? 's' : ''} deducted. Penalty increases with each attempt. (Attempt #${c})`,
   fullscreen_exit: (p, c) =>
@@ -24,15 +19,13 @@ const EVENT_MESSAGES: Record<string, (penalty: number, count: number, extra?: nu
 }
 
 export function useEventLogger() {
-  const { push } = useToast()
+  // const { push } = useToast()
 
-  const tabSwitchCount   = useRef(0)
   const copyPasteCount   = useRef(0)
   const fullscreenCount  = useRef(0)
-  const lastFocusLog     = useRef(0)
 
   const fire = useCallback(async (
-    eventType: 'out_of_focus' | 'copy_paste' | 'fullscreen_exit',
+    eventType: 'copy_paste' | 'fullscreen_exit',
     count: number,
     metadata: Record<string, unknown>,
     extraForMessage?: number,
@@ -75,24 +68,6 @@ export function useEventLogger() {
   useEffect(() => {
     if (!IS_PROD) return
 
-    // ── out_of_focus ───────────────────────────────────────────
-    // Wait one tick after blur — if document.hasFocus() is still true,
-    // focus moved to an internal iframe (Monaco editor) not a real tab switch.
-    const onBlur = () => {
-      setTimeout(() => {
-        // document.hasFocus() returns true when focus is inside a child iframe
-        if (document.hasFocus()) return
-
-        const now = Date.now()
-        if (now - lastFocusLog.current < FOCUS_DEBOUNCE) return
-        lastFocusLog.current = now
-        tabSwitchCount.current += 1
-        fire('out_of_focus', tabSwitchCount.current, {
-          tabSwitchCount: tabSwitchCount.current,
-        })
-      }, 100)
-    }
-
     // ── copy_paste: document-level (outside Monaco) ────────────
     const onPaste = () => {
       copyPasteCount.current += 1
@@ -111,12 +86,10 @@ export function useEventLogger() {
       })
     }
 
-    window.addEventListener('blur',              onBlur)
     document.addEventListener('paste',           onPaste,           true)
     document.addEventListener('fullscreen-exit', onFullscreenExit)
 
     return () => {
-      window.removeEventListener('blur',              onBlur)
       document.removeEventListener('paste',           onPaste,           true)
       document.removeEventListener('fullscreen-exit', onFullscreenExit)
     }

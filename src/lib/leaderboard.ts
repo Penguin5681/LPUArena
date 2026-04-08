@@ -3,7 +3,7 @@ import { trackApiCall } from './apiTracker'
 
 const BASE = import.meta.env.VITE_API_BASE_URL as string
 
-export type EventType = 'out_of_focus' | 'copy_paste' | 'fullscreen_exit'
+export type EventType = 'copy_paste' | 'fullscreen_exit'
 
 export interface EventPayload {
   eventType: EventType

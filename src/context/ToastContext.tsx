@@ -54,11 +54,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <div className="toast-title">{t.title}</div>
               <div className="toast-msg">{t.message}</div>
             </div>
-            <button
-              className="toast-close"
-              onClick={() => dismiss(t.id)}
-              aria-label="Dismiss"
-            >✕</button>
           </div>
         ))}
       </div>
