@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { logEvent } from '../lib/leaderboard'
+import { useToast } from '../context/ToastContext'
 
 const IS_PROD = import.meta.env.VITE_APP_ENV === 'production'
 
@@ -19,7 +20,7 @@ const EVENT_MESSAGES: Record<string, (penalty: number, count: number, extra?: nu
 }
 
 export function useEventLogger() {
-  // const { push } = useToast()
+  const { push } = useToast()
 
   const copyPasteCount   = useRef(0)
   const fullscreenCount  = useRef(0)
