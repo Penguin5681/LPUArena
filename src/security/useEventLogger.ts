@@ -76,14 +76,21 @@ export function useEventLogger() {
     if (!IS_PROD) return
 
     // ── out_of_focus ───────────────────────────────────────────
+    // Wait one tick after blur — if document.hasFocus() is still true,
+    // focus moved to an internal iframe (Monaco editor) not a real tab switch.
     const onBlur = () => {
-      const now = Date.now()
-      if (now - lastFocusLog.current < FOCUS_DEBOUNCE) return
-      lastFocusLog.current = now
-      tabSwitchCount.current += 1
-      fire('out_of_focus', tabSwitchCount.current, {
-        tabSwitchCount: tabSwitchCount.current,
-      })
+      setTimeout(() => {
+        // document.hasFocus() returns true when focus is inside a child iframe
+        if (document.hasFocus()) return
+
+        const now = Date.now()
+        if (now - lastFocusLog.current < FOCUS_DEBOUNCE) return
+        lastFocusLog.current = now
+        tabSwitchCount.current += 1
+        fire('out_of_focus', tabSwitchCount.current, {
+          tabSwitchCount: tabSwitchCount.current,
+        })
+      }, 100)
     }
 
     // ── copy_paste: document-level (outside Monaco) ────────────
